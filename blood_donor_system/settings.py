@@ -26,7 +26,9 @@ SECRET_KEY = 'django-insecure-w5h4+te7q1m-0wr=+5c+xs#2f3l4iz6hs@#@+!iqlxyzk2ja17
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["blood-donor-system-uakh.onrender.com",
+    "localhost",
+    "127.0.0.1"]
 
 
 # Application definition
@@ -120,7 +122,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -135,5 +143,3 @@ LOGOUT_REDIRECT_URL = '/login/'
 
 # Email configuration for simulation
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-STATIC_URL = os.path.join(BASE_DIR, 'staticfiles')
