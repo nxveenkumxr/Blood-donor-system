@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Blood Donor System</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-danger">
+<div class="container">
+
+<a class="navbar-brand" href="/">🩸 Blood Donor</a>
+
+<ul class="navbar-nav">
+
+<li class="nav-item">
+<a class="nav-link" href="/">Home</a>
+</li>
+
+<li class="nav-item">
+<a class="nav-link" href="/donors/list/">Donors</a>
+</li>
+
+<li class="nav-item">
+<a class="nav-link" href="/donors/register/">Register Donor</a>
+</li>
+
+<li class="nav-item">
+<a class="nav-link" href="/requests/create/">Create Request</a>
+</li>
+
+<li class="nav-item">
+<a class="nav-link" href="/requests/history/">Request History</a>
+</li>
+
+</ul>
+
+<ul class="navbar-nav ms-auto">
+
+<li class="nav-item text-white mt-2">
+Hello {{ request.user.username }}
+</li>
+
+<li class="nav-item">
+<a class="nav-link" href="/logout/">Logout</a>
+</li>
+
+</ul>
+
+</div>
+</nav>
+
+
+<div class="container mt-4">
+
+{% block content %}
+
+{% endblock %}
+
+</div>
+
+<!-- Smart Donor Assistant Chatbot -->
+<style>
+    #chatbot-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        font-size: 28px;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+        cursor: pointer;
+        z-index: 9999;
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #chatbot-btn:hover {
+        transform: scale(1.1);
+    }
+    #chatbot-window {
+        position: fixed;
+        bottom: 100px;
+        right: 30px;
+        width: 350px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+        z-index: 10000;
+        border: 1px solid rgba(0,0,0,0.1);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    #chatbot-header {
+        background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+        color: white;
+        padding: 15px 20px;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    #chatbot-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        line-height: 1;
+        opacity: 0.8;
+    }
+    #chatbot-close:hover {
+        opacity: 1;
+    }
+    #chatbot-messages {
+        height: 320px;
+        overflow-y: auto;
+        padding: 20px 15px;
+        background: #f8f9fa;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .chat-msg {
+        max-width: 85%;
+        padding: 12px 16px;
+        border-radius: 18px;
+        font-size: 14.5px;
+        line-height: 1.4;
+        word-wrap: break-word;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .chat-msg.bot {
+        background: #ffffff;
+        color: #333;
+        align-self: flex-start;
+        border-bottom-left-radius: 4px;
+        border: 1px solid #eee;
+    }
+    .chat-msg.user {
+        background: #dc3545;
+        color: white;
+        align-self: flex-end;
+        border-bottom-right-radius: 4px;
+    }
+    #chatbot-input-area {
+        display: flex;
+        padding: 15px;
+        background: white;
+        border-top: 1px solid #eee;
+    }
+    #chatbot-input-area input {
+        flex: 1;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    #chatbot-input-area input:focus {
+        border-color: #dc3545;
+    }
+    #chatbot-input-area button {
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 42px;
+        height: 42px;
+        margin-left: 10px;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 2px 5px rgba(220, 53, 69, 0.3);
+    }
+</style>
+
+<button id="chatbot-btn">💬</button>
+
+<div id="chatbot-window">
+    <div id="chatbot-header">
+        <span>🤖 Smart Assistant</span>
+        <button id="chatbot-close">&times;</button>
+    </div>
+    <div id="chatbot-messages">
+        <div class="chat-msg bot">Hi there! 👋 I am here to help. <br><br>Try asking:<br>- "How to register as donor?"<br>- "How to create a blood request?"<br>- "Where can I find donors near me?"</div>
+    </div>
+    <div id="chatbot-input-area">
+        <input type="text" id="chat-input" placeholder="Type a message...">
+        <button id="chat-send">➤</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const chatBtn = document.getElementById("chatbot-btn");
+        const chatWindow = document.getElementById("chatbot-window");
+        const chatClose = document.getElementById("chatbot-close");
+        const chatInput = document.getElementById("chat-input");
+        const chatSend = document.getElementById("chat-send");
+        const chatMessages = document.getElementById("chatbot-messages");
+
+        // Toggle visibility
+        chatBtn.addEventListener("click", () => {
+            chatWindow.style.display = chatWindow.style.display === "flex" ? "none" : "flex";
+            if(chatWindow.style.display === "flex") {
+                chatInput.focus();
+            }
+        });
+
+        // Close window
+        chatClose.addEventListener("click", () => {
+            chatWindow.style.display = "none";
+        });
+
+        // Add message purely to UI
+        function addMessage(text, sender) {
+            const msgDiv = document.createElement("div");
+            msgDiv.classList.add("chat-msg", sender);
+            msgDiv.innerHTML = text.replace(/\n/g, "<br>");
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Intelligence routing module
+        function getBotResponse(rawInput) {
+            const input = rawInput.toLowerCase();
+            
+            if (input.includes("register") || input.includes("signup") || input.includes("join")) {
+                return "You can register right now by clicking 'Register Donor' in the top navigation bar!\n\nRemember, you must be between 18-60 years old and weigh at least 50kg.";
+            } 
+            else if (input.includes("compatible") || input.includes("blood group")) {
+                if (input.includes("o+")) return "O+ is very versatile! It can give to O+, A+, B+, and AB+. However, it can ONLY receive from O+ and O-.";
+                if (input.includes("o-")) return "O- is the ultimate Universal Donor! It can safely give blood to literally ANY group, but sadly can only receive from O-.";
+                if (input.includes("ab+")) return "AB+ is the Universal Recipient! It can receive blood from ANY blood type without complications.";
+                return "Try asking about a specific blood group like O+, O-, A-, or AB+ to see exact compatibilities.";
+            } 
+            else if (input.includes("create") && (input.includes("request") || input.includes("blood"))) {
+                return "Easy! Just go to 'Create Request' at the top of the screen. After you submit the patient and hospital info, my system immediately cross-references all donors to automatically pull the closest perfect matches!";
+            } 
+            else if (input.includes("near me") || input.includes("where") || input.includes("find donor")) {
+                return "You don't even have to look manually! \n\nMy built-in Nearest Donor Finder algorithm instantly uses geographic coordinates (via Google Maps APIs) to lock onto the closest matching donors the second you submit an emergency Blood Request.";
+            } 
+            else if (input.includes("hi") || input.includes("hello")) {
+                return "Hello to you too! What can I help you find today? Do you want to be a donor or do you need blood?";
+            } 
+            else {
+                return "I am still learning! Try explicitly asking about:\n- How to register\n- How to create a request\n- Donors near me\n- O+ compatibility";
+            }
+        }
+
+        // Process message
+        function handleSend() {
+            const val = chatInput.value.trim();
+            if (val) {
+                addMessage(val, "user");
+                chatInput.value = "";
+                // typing simulation delay
+                setTimeout(() => {
+                    const response = getBotResponse(val);
+                    addMessage(response, "bot");
+                }, 600);
+            }
+        }
+
+        // Submission triggers
+        chatSend.addEventListener("click", handleSend);
+        chatInput.addEventListener("keypress", function(e) {
+            if (e.key === "Enter") handleSend();
+        });
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

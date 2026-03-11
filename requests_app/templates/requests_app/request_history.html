@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card shadow p-4 border-0 mt-4 bg-dark text-light">
+    <h3 class="mb-4 text-center text-danger">🩸 Blood Request History</h3>
+
+    <div class="table-responsive rounded shadow-sm">
+        <table class="table table-dark table-hover table-striped align-middle mb-0">
+            <thead class="table-group-divider text-white text-uppercase" style="background-color: #dc3545;">
+                <tr>
+                    <th>Patient</th>
+                    <th>Blood Type</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in requests %}
+                <tr class="{% if req.is_emergency %}table-danger border-danger{% endif %}">
+                    <td class="fw-bold">
+                        {{ req.patient_name }}
+                        {% if req.is_emergency %}
+                            <span class="badge bg-danger ms-1 shake"><i class="bi bi-exclamation-triangle-fill"></i> EMERGENCY</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-danger fw-bold fs-5">{{ req.blood_group_needed }}</td>
+                    <td>
+                        <div>{{ req.hospital_name }}</div>
+                        <small class="text-muted"><i class="bi bi-geo-alt"></i> {{ req.city }}</small>
+                    </td>
+                    <td>
+                        {% if req.status == "Pending" %}
+                            <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split"></i> {{ req.status }}</span>
+                        {% elif req.status == "Approved" %}
+                            <span class="badge bg-info text-dark"><i class="bi bi-check-circle"></i> {{ req.status }}</span>
+                        {% elif req.status == "Completed" %}
+                            <span class="badge bg-success"><i class="bi bi-check2-all"></i> {{ req.status }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary"><i class="bi bi-x-circle"></i> {{ req.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if req.status == "Pending" %}
+                            <a href="{% url 'mark_approved' req.id %}" class="btn btn-sm btn-outline-success shadow-sm me-1">✓ Approve</a>
+                            <a href="{% url 'mark_rejected' req.id %}" class="btn btn-sm btn-outline-danger shadow-sm">✗ Reject</a>
+                        {% elif req.status == "Approved" %}
+                            <a href="{% url 'mark_completed' req.id %}" class="btn btn-sm btn-primary shadow-sm">Mark Completed</a>
+                        {% else %}
+                            <button class="btn btn-sm btn-secondary disabled shadow-sm">Locked</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted p-4">No blood requests have been made yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+/* Subtle shake animation for emergency badge */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  50% { transform: translateX(2px); }
+  75% { transform: translateX(-2px); }
+  100% { transform: translateX(0); }
+}
+.shake {
+  animation: shake 2s infinite;
+  display: inline-block;
+}
+</style>
+
+{% endblock %}

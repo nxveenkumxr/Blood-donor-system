@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="mb-4">Dashboard</h2>
+
+<div class="row">
+
+<div class="col-md-4">
+<div class="card text-center shadow">
+<div class="card-body">
+<h1>{{ total_donors }}</h1>
+<p>Total Donors</p>
+</div>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="card text-center shadow bg-success text-white">
+<div class="card-body">
+<h1>{{ available_donors }}</h1>
+<p>Available Donors</p>
+</div>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="card text-center shadow bg-primary text-white">
+<div class="card-body">
+<h1>{{ total_requests }}</h1>
+<p>Total Requests</p>
+</div>
+</div>
+</div>
+
+</div>
+
+
+<h4 class="mt-5">Recent Blood Requests</h4>
+
+<table class="table table-bordered table-striped mt-3">
+
+<thead class="table-dark">
+<tr>
+<th>Patient</th>
+<th>Blood Group</th>
+<th>Units</th>
+<th>Hospital</th>
+<th>City</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% if recent_requests %}
+{% for r in recent_requests %}
+<tr>
+<td>{{ r.patient_name }}</td>
+<td>{{ r.blood_group }}</td>
+<td>{{ r.units }}</td>
+<td>{{ r.hospital }}</td>
+<td>{{ r.city }}</td>
+</tr>
+{% endfor %}
+{% else %}
+<tr>
+<td colspan="5" class="text-center">No Requests Found</td>
+</tr>
+{% endif %}
+
+</tbody>
+
+</table>
+
+
+<h4 class="mt-5 text-center">Blood Group Distribution</h4>
+
+<div class="row justify-content-center">
+<div class="col-md-8">
+<div class="card shadow p-3">
+<div style="position: relative; height: 350px; width: 100%;">
+<canvas id="bloodChart"></canvas>
+</div>
+</div>
+</div>
+</div>
+
+{% block scripts %}
+<script>
+
+const labels = {{ labels|safe }};
+const data = {{ data|safe }};
+
+const ctx = document.getElementById('bloodChart');
+
+new Chart(ctx, {
+type: 'bar',
+data: {
+labels: labels,
+datasets: [{
+label: 'Donors by Blood Group',
+data: data,
+backgroundColor: [
+'#ff6384',
+'#36a2eb',
+'#ffce56',
+'#4bc0c0',
+'#9966ff',
+'#ff9f40',
+'#8dd1e1',
+'#a4de6c'
+],
+borderRadius: 6
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+plugins: {
+title: {
+display: true,
+text: 'Donor Distribution by Blood Group',
+font: {
+size: 18
+}
+},
+legend: {
+display: false
+}
+},
+scales: {
+y: {
+beginAtZero: true,
+ticks: {
+precision: 0
+}
+}
+}
+}
+});
+
+</script>
+{% endblock %}
+
+{% endblock %}

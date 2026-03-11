@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Blood Donor System</title>
+</head>
+
+<body>
+
+<div>
+    <a href="/">🩸 Smart Blood Donor</a>
+</div>
+
+<div>
+    <a href="/donors/list/">Donors</a>
+    <a href="/donors/register/">Register</a>
+    <a href="/requests/create/">Request</a>
+    <a href="/requests/history/">History</a>
+
+    {% if user.is_authenticated %}
+        Hello, {{ user.username }}
+        <a href="/logout/">Logout</a>
+    {% else %}
+        <a href="/login/">Login</a>
+    {% endif %}
+</div>
+
+<hr>
+
+{% block content %}
+{% endblock %}
+<a href="/requests/create/">Create Request</a>
+
+</body>
+</html>

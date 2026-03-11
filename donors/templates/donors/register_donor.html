@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card shadow p-4">
+    <h3 class="text-danger mb-3">Register Donor</h3>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit" class="btn btn-danger">
+            Save Donor
+        </button>
+    </form>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const cityInput = document.getElementById("id_city");
+    const latInput = document.getElementById("id_latitude");
+    const lonInput = document.getElementById("id_longitude");
+
+    if (cityInput && latInput && lonInput) {
+        cityInput.addEventListener("blur", function() {
+            const city = cityInput.value.trim();
+            if (city) {
+                // Fetch coordinates using Google Maps Geocoding API
+                // ⚠️ IMPORTANT: Replace 'YOUR_GOOGLE_MAPS_API_KEY' with your actual Google API Key
+                const apiKey = "YOUR_GOOGLE_MAPS_API_KEY";
+                fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(city)}&key=${apiKey}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "OK" && data.results.length > 0) {
+                            const location = data.results[0].geometry.location;
+                            latInput.value = parseFloat(location.lat).toFixed(6);
+                            lonInput.value = parseFloat(location.lng).toFixed(6);
+                            
+                            // Optional flash visual feedback
+                            latInput.classList.add('is-valid');
+                            lonInput.classList.add('is-valid');
+                        } else {
+                            console.warn("Google Maps API returned no results or error:", data.status);
+                        }
+                    })
+                    .catch(error => console.error("Error fetching geolocation:", error));
+            }
+        });
+    }
+});
+</script>
+
+{% endblock %}

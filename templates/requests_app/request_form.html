@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Create Blood Request</h2>
+
+<form method="POST">
+
+{% csrf_token %}
+
+{{ form.as_p }}
+
+<button type="submit" class="btn btn-danger">
+Find Matching Donors
+</button>
+
+</form>
+
+<hr>
+
+{% if matched_donors %}
+
+<h3>Matching Donors</h3>
+
+<table class="table table-bordered">
+
+<tr>
+<th>Name</th>
+<th>Blood Group</th>
+<th>City</th>
+<th>Phone</th>
+</tr>
+
+{% for donor in matched_donors %}
+
+<tr>
+<td>{{ donor.full_name }}</td>
+<td>{{ donor.blood_group }}</td>
+<td>{{ donor.city }}</td>
+<td>{{ donor.phone_number }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% elif matched_donors is not None %}
+
+<p style="color:red;">No matching donors found.</p>
+
+{% endif %}
+
+{% endblock %}
+
+<h3 class="mt-5">Live Donor Finder</h3>
+
+<div class="row">
+
+<div class="col-md-4">
+
+<select id="blood_group" class="form-control">
+
+<option value="">Select Blood Group</option>
+<option>A+</option>
+<option>A-</option>
+<option>B+</option>
+<option>B-</option>
+<option>O+</option>
+<option>O-</option>
+<option>AB+</option>
+<option>AB-</option>
+
+</select>
+
+</div>
+
+<div class="col-md-4">
+
+<input type="text" id="city" class="form-control" placeholder="Enter city">
+
+</div>
+
+<div class="col-md-4">
+
+<button onclick="searchDonors()" class="btn btn-primary">
+Search Donors
+</button>
+
+</div>
+
+</div>
+
+
+<br>
+{% if alert_message %}
+
+<div class="alert alert-warning mt-3">
+    {{ alert_message }}
+</div>
+
+{% endif %}
+
+<table class="table table-bordered" id="donorTable">
+
+<thead>
+
+<tr>
+<th>Name</th>
+<th>Blood Group</th>
+<th>City</th>
+<th>Phone</th>
+</tr>
+
+</thead>
+
+<tbody></tbody>
+
+</table>
+
+<script>
+
+function searchDonors(){
+
+let blood_group = document.getElementById("blood_group").value
+let city = document.getElementById("city").value
+
+fetch(`/requests/find-donors/?blood_group=${blood_group}&city=${city}`)
+
+.then(response => response.json())
+
+.then(data => {
+
+let table = document.querySelector("#donorTable tbody")
+
+table.innerHTML = ""
+
+data.donors.forEach(donor => {
+
+table.innerHTML += `
+<tr>
+<td>${donor.name}</td>
+<td>${donor.blood_group}</td>
+<td>${donor.city}</td>
+<td>${donor.phone}</td>
+</tr>
+`
+
+})
+
+})
+
+}
+
+</script>

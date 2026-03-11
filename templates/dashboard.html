@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+/* Modern Medical Dashboard UI Styling */
+:root {
+    --card-hover-translate: translateY(-8px);
+}
+
+.dashboard-card {
+    border: none;
+    border-radius: 16px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    color: #fff;
+    position: relative;
+    z-index: 1;
+}
+.dashboard-card:hover {
+    transform: var(--card-hover-translate);
+    z-index: 2;
+    filter: brightness(1.1);
+}
+
+@keyframes pulseGlowBlue {
+    0% { box-shadow: 0 0 15px rgba(42, 82, 152, 0.6); }
+    50% { box-shadow: 0 0 35px rgba(42, 82, 152, 1); }
+    100% { box-shadow: 0 0 15px rgba(42, 82, 152, 0.6); }
+}
+@keyframes pulseGlowGreen {
+    0% { box-shadow: 0 0 15px rgba(56, 239, 125, 0.6); }
+    50% { box-shadow: 0 0 35px rgba(56, 239, 125, 1); }
+    100% { box-shadow: 0 0 15px rgba(56, 239, 125, 0.6); }
+}
+@keyframes pulseGlowRed {
+    0% { box-shadow: 0 0 15px rgba(255, 65, 108, 0.6); }
+    50% { box-shadow: 0 0 35px rgba(255, 65, 108, 1); }
+    100% { box-shadow: 0 0 15px rgba(255, 65, 108, 0.6); }
+}
+
+.card-total-donors {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    box-shadow: 0 0 20px rgba(42, 82, 152, 0.5);
+    border: 1px solid rgba(42, 82, 152, 0.8);
+}
+.card-total-donors:hover {
+    animation: pulseGlowBlue 1.5s infinite;
+}
+
+.card-available-donors {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    box-shadow: 0 0 20px rgba(56, 239, 125, 0.5);
+    border: 1px solid rgba(56, 239, 125, 0.8);
+}
+.card-available-donors:hover {
+    animation: pulseGlowGreen 1.5s infinite;
+}
+
+.card-total-requests {
+    background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+    box-shadow: 0 0 20px rgba(255, 65, 108, 0.5);
+    border: 1px solid rgba(255, 65, 108, 0.8);
+}
+.card-total-requests:hover {
+    animation: pulseGlowRed 1.5s infinite;
+}
+
+.chart-card {
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: 1px solid #f0f0f0;
+}
+.chart-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+.custom-table-card {
+    border-radius: 16px;
+    overflow: hidden;
+    background: #212529;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+.list-group-hospital {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+</style>
+
+<div class="container mt-4">
+
+<h2 class="mb-4">Dashboard</h2>
+
+<div class="row">
+
+<div class="col-md-4">
+<div class="card text-center shadow dashboard-card card-total-donors mb-3">
+<div class="card-body py-4">
+<h2 class="display-5 fw-bold mb-1">{{ total_donors }}</h2>
+<p class="mb-0 text-light fw-semibold text-uppercase tracking-wide">Total Donors</p>
+</div>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="card text-center shadow dashboard-card card-available-donors mb-3">
+<div class="card-body py-4">
+<h2 class="display-5 fw-bold mb-1">{{ available_donors }}</h2>
+<p class="mb-0 text-light fw-semibold text-uppercase tracking-wide">Available Donors</p>
+</div>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="card text-center shadow dashboard-card card-total-requests mb-3">
+<div class="card-body py-4">
+<h2 class="display-5 fw-bold mb-1">{{ total_requests }}</h2>
+<p class="mb-0 text-light fw-semibold text-uppercase tracking-wide">Total Requests</p>
+</div>
+</div>
+</div>
+
+</div>
+
+
+<!-- Top Cities & Recent Requests -->
+<div class="row mt-5">
+    
+<div class="col-md-8">
+<h4 class="mb-3 text-secondary border-bottom pb-2">Recent Blood Requests</h4>
+<div class="table-responsive shadow-sm custom-table-card border-0 mb-4">
+<table class="table table-dark table-hover table-striped align-middle mb-0">
+<thead>
+<tr class="text-uppercase text-secondary" style="font-size: 0.85rem; letter-spacing: 0.5px;">
+<th>Patient</th>
+<th>Blood Group</th>
+<th>Units</th>
+<th>Hospital</th>
+<th>City</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+{% for req in recent_requests %}
+<tr>
+<td class="fw-bold"><i class="bi bi-person-fill text-secondary me-1"></i> {{ req.patient_name }}</td>
+<td class="text-danger fw-bold fs-5">{{ req.blood_group_needed }}</td>
+<td><span class="badge bg-secondary rounded-pill px-3">{{ req.units_required }}</span></td>
+<td><i class="bi bi-building text-info me-1"></i> {{ req.hospital_name }}</td>
+<td class="text-muted"><i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ req.city }}</td>
+<td>
+    {% if req.status == 'Pending' %}
+        <span class="badge bg-warning text-dark shadow-sm"><i class="bi bi-hourglass-split"></i> Pending</span>
+    {% elif req.status == 'Approved' %}
+        <span class="badge bg-primary shadow-sm"><i class="bi bi-check-circle"></i> Approved</span>
+    {% elif req.status == 'Completed' %}
+        <span class="badge bg-success shadow-sm"><i class="bi bi-check2-all"></i> Completed</span>
+    {% else %}
+        <span class="badge bg-secondary shadow-sm"><i class="bi bi-x-circle"></i> {{ req.status }}</span>
+    {% endif %}
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="col-md-4">
+<h4 class="mb-3 text-secondary border-bottom pb-2">Top 5 Cities</h4>
+<ul class="list-group list-group-hospital">
+{% for city in top_cities %}
+<li class="list-group-item bg-dark text-light d-flex justify-content-between align-items-center border-secondary py-3">
+<div class="d-flex align-items-center"><span class="text-danger fw-bold me-2">📍</span> {{ city.city }}</div>
+<span class="badge bg-danger rounded-pill px-3 py-2 shadow-sm">{{ city.count }}</span>
+</li>
+{% empty %}
+<li class="list-group-item bg-dark text-muted">No data</li>
+{% endfor %}
+</ul>
+</div>
+
+</div>
+
+<!-- City & General Blood Distribution -->
+<div class="row mt-5">
+<div class="col-md-6 text-center">
+<h4>City-wise Donor Distribution</h4>
+<div class="card chart-card p-3 border-0" style="width:350px;height:350px;margin:auto;">
+<canvas id="cityChart"></canvas>
+</div>
+</div>
+
+<div class="col-md-6 text-center">
+<h4>Monthly Demand Trends</h4>
+<div class="card chart-card p-3 border-0" style="width:350px;height:350px;margin:auto;">
+<canvas id="trendChart"></canvas>
+</div>
+</div>
+</div>
+
+<!-- Demand vs Supply -->
+<div class="row mt-5">
+<div class="col-md-10 offset-md-1 text-center">
+<h4 class="text-secondary mb-4">Blood Demand vs Supply</h4>
+<div class="card chart-card p-4 border-0" style="width:100%;height:350px;margin:auto;">
+<canvas id="demandSupplyChart"></canvas>
+</div>
+</div>
+</div>
+
+<!-- New Analytics: Request Status & Donor Availability -->
+<div class="row mt-5">
+<div class="col-md-6 text-center">
+<h4>Request Status Distribution</h4>
+<div class="card chart-card p-3 border-0" style="width:350px;height:350px;margin:auto;">
+<canvas id="statusChart"></canvas>
+</div>
+</div>
+
+<div class="col-md-6 text-center">
+<h4>Donor Availability Overview</h4>
+<div class="card chart-card p-3 border-0" style="width:350px;height:350px;margin:auto;">
+<canvas id="availabilityChart"></canvas>
+</div>
+</div>
+</div>
+
+</div>
+
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Hospital-style premium chart animations
+const globalAnimationOpts = {
+    duration: 2500,
+    easing: 'easeOutQuart'
+};
+
+const cityLabels = {{ city_labels|safe }};
+const cityCounts = {{ city_counts|safe }};
+
+new Chart(document.getElementById('cityChart'), {
+type: 'pie',
+data: {
+labels: cityLabels,
+datasets: [{
+data: cityCounts,
+backgroundColor:[
+'#ff6384',
+'#36a2eb',
+'#ffce56',
+'#4bc0c0',
+'#9966ff',
+'#ff9f40'
+]
+}]
+},
+options:{ responsive:true, maintainAspectRatio: false, animation: globalAnimationOpts }
+});
+
+
+const trendLabels = {{ trend_labels|safe }};
+const trendCounts = {{ trend_counts|safe }};
+
+new Chart(document.getElementById('trendChart'), {
+type: 'line',
+data: {
+labels: trendLabels,
+datasets: [{
+label: 'Requests',
+data: trendCounts,
+borderColor: '#ff6384',
+backgroundColor: 'rgba(255, 99, 132, 0.2)',
+borderWidth: 2,
+fill: true
+}]
+},
+options:{ responsive:true, maintainAspectRatio: false, animation: globalAnimationOpts }
+});
+
+
+const bloodLabels = {{ blood_labels|safe }};
+const bloodCounts = {{ blood_counts|safe }};
+const demandCounts = {{ demand_counts|safe }};
+
+new Chart(document.getElementById('demandSupplyChart'), {
+type:'bar',
+data:{
+labels:bloodLabels,
+datasets:[
+{
+    label:'Supply (Donors)',
+    data:bloodCounts,
+    backgroundColor:'#36a2eb'
+},
+{
+    label:'Demand (Requests)',
+    data:demandCounts,
+    backgroundColor:'#ff6384'
+}
+]
+},
+options:{ responsive:true, maintainAspectRatio: false, animation: globalAnimationOpts }
+});
+
+const statusLabels = {{ status_labels|safe }};
+const statusCounts = {{ status_counts|safe }};
+
+new Chart(document.getElementById('statusChart'), {
+type: 'doughnut',
+data: {
+labels: statusLabels,
+datasets: [{
+data: statusCounts,
+backgroundColor: ['#ffc107', '#28a745', '#007bff', '#dc3545']
+}]
+},
+options:{ responsive:true, maintainAspectRatio: false, animation: globalAnimationOpts }
+});
+
+const availabilityLabels = {{ availability_labels|safe }};
+const availabilityCounts = {{ availability_counts|safe }};
+
+new Chart(document.getElementById('availabilityChart'), {
+type: 'pie',
+data: {
+labels: availabilityLabels,
+datasets: [{
+data: availabilityCounts,
+backgroundColor: ['#28a745', '#dc3545']
+}]
+},
+options:{ responsive:true, maintainAspectRatio: false, animation: globalAnimationOpts }
+});
+
+</script>
+{% endblock %}
+
+{% endblock %}

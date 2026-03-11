@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Donor List</h2>
+
+<div class="card p-4 shadow mb-4">
+    <form method="GET" class="row gx-3 gy-2 align-items-center">
+        <div class="col-md-3">
+            <label class="form-label fw-bold">Blood Group</label>
+            <select name="blood_group" class="form-select">
+                <option value="">All Groups</option>
+                <option value="A+" {% if selected_blood == "A+" %}selected{% endif %}>A+</option>
+                <option value="A-" {% if selected_blood == "A-" %}selected{% endif %}>A-</option>
+                <option value="B+" {% if selected_blood == "B+" %}selected{% endif %}>B+</option>
+                <option value="B-" {% if selected_blood == "B-" %}selected{% endif %}>B-</option>
+                <option value="O+" {% if selected_blood == "O+" %}selected{% endif %}>O+</option>
+                <option value="O-" {% if selected_blood == "O-" %}selected{% endif %}>O-</option>
+                <option value="AB+" {% if selected_blood == "AB+" %}selected{% endif %}>AB+</option>
+                <option value="AB-" {% if selected_blood == "AB-" %}selected{% endif %}>AB-</option>
+            </select>
+        </div>
+        
+        <div class="col-md-3">
+            <label class="form-label fw-bold">City</label>
+            <input type="text" name="city" class="form-control" placeholder="Enter city" value="{{ selected_city|default:'' }}">
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label fw-bold">Availability</label>
+            <select name="availability" class="form-select">
+                <option value="">Any</option>
+                <option value="True" {% if selected_availability == "True" %}selected{% endif %}>Available</option>
+                <option value="False" {% if selected_availability == "False" %}selected{% endif %}>Not Available</option>
+            </select>
+        </div>
+        
+        <div class="col-md-3 d-flex align-items-end mt-4">
+            <button type="submit" class="btn btn-danger w-100 shadow-sm">🔍 Search</button>
+        </div>
+    </form>
+</div>
+
+<div class="table-responsive shadow rounded">
+    <div class="bg-dark p-3 border-bottom border-secondary">
+        <input type="text" id="liveSearchInput" class="form-control bg-secondary text-white border-0 shadow-sm" placeholder="⚡ Live Search: Type to instantly filter donors by Name, Blood Group, City...">
+    </div>
+    <table class="table table-dark table-hover table-striped align-middle mb-0">
+        <thead class="table-group-divider">
+            <tr>
+                <th>Name</th>
+                <th>Blood Group</th>
+                <th>City</th>
+                <th>Last Donation</th>
+                <th>Status</th>
+                <th class="text-center">Action</th>
+            </tr>
+        </thead>
+        <tbody id="donorTableBody">
+            {% for donor in donors %}
+            <tr>
+                <td><a href="{% url 'donor_detail' donor.id %}" class="text-light text-decoration-none fw-bold">{{ donor.full_name }}</a></td>
+                <td class="text-danger fw-bold">{{ donor.blood_group }}</td>
+                <td>{{ donor.city }} {% if donor.taluk %}({{ donor.taluk }}){% endif %}</td>
+                <td>{{ donor.last_donation_date|default:"Never" }}</td>
+                <td>
+                    {% if donor.availability_status %}
+                        <span class="badge bg-success">Available</span>
+                    {% else %}
+                        <span class="badge bg-danger">Not Available</span>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    <a href="{% url 'donor_detail' donor.id %}" class="btn btn-sm btn-info text-white shadow-sm">View Profile</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center py-4 text-muted">No donors found matching the criteria.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.getElementById('liveSearchInput').addEventListener('keyup', function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#donorTableBody tr');
+        rows.forEach(row => {
+            // Exclude empty state tr if present
+            if (row.cells.length === 1) return;
+            let text = row.textContent.toLowerCase();
+            row.style.display = text.includes(filter) ? '' : 'none';
+        });
+    });
+</script>
+{% endblock %}

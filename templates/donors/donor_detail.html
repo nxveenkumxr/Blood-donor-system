@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card shadow p-4 mt-4 bg-dark text-light border-0" style="max-width: 600px; margin: auto;">
+    <h2 class="text-center text-danger mb-4">🩸 Donor Profile</h2>
+    
+    <div class="row mb-3">
+        <label class="col-sm-4 fw-bold">Full Name:</label>
+        <div class="col-sm-8">{{ donor.full_name }}</div>
+    </div>
+    
+    <div class="row mb-3">
+        <label class="col-sm-4 fw-bold">Blood Group:</label>
+        <div class="col-sm-8 text-danger fw-bold">{{ donor.blood_group }}</div>
+    </div>
+    
+    <div class="row mb-3">
+        <label class="col-sm-4 fw-bold">Contact Email:</label>
+        <div class="col-sm-8">{{ donor.email }}</div>
+    </div>
+
+    <div class="row mb-3">
+        <label class="col-sm-4 fw-bold align-self-center">Phone Number:</label>
+        <div class="col-sm-8 d-flex align-items-center">
+            {{ donor.phone_number }}
+            {% if donor.phone_number %}
+                <a href="tel:{{ donor.phone_number }}" class="btn btn-primary btn-sm ms-3 d-inline-flex align-items-center">
+                    <i class="bi bi-telephone-fill me-1"></i> Call Donor
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <label class="col-sm-4 fw-bold">Location Details:</label>
+        <div class="col-sm-8">
+            <strong>City:</strong> {{ donor.city }}<br>
+            {% if donor.taluk %}<strong>Taluk:</strong> {{ donor.taluk }}<br>{% endif %}
+            {% if donor.town_village %}<strong>Town/Village:</strong> {{ donor.town_village }}<br>{% endif %}
+            {% if donor.area %}<strong>Area:</strong> {{ donor.area }}<br>{% endif %}
+            <div class="rounded overflow-hidden shadow-sm mt-2" style="height: 200px;">
+                <iframe width="100%" height="100%" frameborder="0" style="border:0" 
+                    src="https://maps.google.com/maps?q={{ donor.area|default:''|urlencode }}+{{ donor.town_village|default:''|urlencode }}+{{ donor.taluk|default:''|urlencode }}+{{ donor.city|urlencode }}&t=&z=12&ie=UTF8&iwloc=&output=embed" 
+                    allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-3">
+        <label class="col-sm-4 fw-bold">Date of Birth:</label>
+        <div class="col-sm-8">{{ donor.date_of_birth|default:"Not Provided" }}</div>
+    </div>
+    
+    <div class="row mb-3">
+        <label class="col-sm-4 fw-bold">Weight:</label>
+        <div class="col-sm-8">{% if donor.weight %}{{ donor.weight }} kg{% else %}Not Provided{% endif %}</div>
+    </div>
+    
+    <div class="row mb-3">
+        <label class="col-sm-4 fw-bold">Active Status:</label>
+        <div class="col-sm-8">
+            {% if donor.availability_status %}
+                <span class="badge bg-success">Available</span>
+            {% else %}
+                <span class="badge bg-danger">Not Available</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <label class="col-sm-4 fw-bold">Smart Eligibility:</label>
+        <div class="col-sm-8">
+            {% if donor.is_eligible %}
+                <span class="badge bg-success">Eligible</span>
+            {% else %}
+                <span class="badge bg-warning text-dark">Ineligible</span>
+            {% endif %}
+            <small class="d-block text-muted mt-1">(Reason: {{ donor.eligibility_reason }})</small>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <label class="col-sm-4 fw-bold">Last Donation Date:</label>
+        <div class="col-sm-8">{{ donor.last_donation_date|default:"Never" }}</div>
+    </div>
+
+    <div class="text-center">
+        <a href="{% url 'toggle_availability' donor.id %}" class="btn btn-warning shadow-sm">Toggle Availability</a>
+        <a href="{% url 'record_donation' donor.id %}" class="btn btn-success shadow-sm">Record Donation</a>
+        <a href="{% url 'donor_list' %}" class="btn btn-secondary shadow-sm">Back to List</a>
+    </div>
+</div>
+{% endblock %}
